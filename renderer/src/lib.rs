@@ -22,3 +22,5 @@ pub mod buffer;
 pub mod renderer;
 pub mod gfx_types;
 pub mod glsl;
+pub mod gpu_data;
+pub mod data_store;

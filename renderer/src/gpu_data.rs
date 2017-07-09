@@ -1,5 +1,12 @@
 use core::math::{Transform2D, Transform3D};
+use vector_image_renderer::{ColorId, TransformId};
 use std::mem;
+
+pub type GpuWord = f32;
+
+pub trait GpuBlock {
+    fn slice(&self) -> &[GpuWord];
+}
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -16,6 +23,11 @@ pub struct GpuBlock16([f32; 16]);
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct GpuBlock32([f32; 32]);
+
+impl GpuBlock for GpuBlock4 { fn slice(&self) -> &[GpuWord] { &self.0[..] } }
+impl GpuBlock for GpuBlock8 { fn slice(&self) -> &[GpuWord] { &self.0[..] } }
+impl GpuBlock for GpuBlock16 { fn slice(&self) -> &[GpuWord] { &self.0[..] } }
+impl GpuBlock for GpuBlock32 { fn slice(&self) -> &[GpuWord] { &self.0[..] } }
 
 macro_rules! default_uninitialized {
     ($Type:ident) => (
@@ -61,6 +73,13 @@ macro_rules! gpu_data_impl {
                 unsafe { mem::transmute(block) }
             }
         }
+
+        impl GpuBlock for $Type {
+            fn slice(&self) -> &[GpuWord] {
+                let block: &$BlockType = unsafe { mem::transmute(self) };
+                return block.slice();
+            }
+        }
     )
 }
 
@@ -103,7 +122,6 @@ macro_rules! gpu_data {
             }
         }
     )
-
 }
 
 gpu_data! {
@@ -136,12 +154,12 @@ gpu_data! {
 }
 
 gpu_data! {
-    #[padding(1)]
+    #[padding(4)]
     struct FillPrimitive: GpuBlock8 {
-        texture_rect: GpuRect,
+        //texture_rect: GpuRect,
         //pub color: [f32; 4],
-        z_index: f32,
-        local_transform: i32,
-        view_transform: i32,
+        z_index: u32,
+        color: ColorId,
+        transforms: [TransformId; 2],
     }
 }

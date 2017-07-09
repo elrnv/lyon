@@ -24,3 +24,4 @@ pub mod gfx_types;
 pub mod glsl;
 pub mod gpu_data;
 pub mod data_store;
+pub mod vector_image_renderer;

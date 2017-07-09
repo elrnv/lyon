@@ -3,7 +3,7 @@ use std::mem;
 use std::rc::Rc;
 use std::collections::HashMap;
 
-use renderer::{GpuFillVertex, GpuStrokeVertex};
+use gfx_renderer::{GpuFillVertex, GpuStrokeVertex};
 use tessellation as tess;
 use tessellation::geometry_builder::{VertexBuffers, BuffersBuilder};
 use path_iterator::*;

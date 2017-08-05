@@ -225,7 +225,7 @@
 use std::marker::PhantomData;
 use std::ops::Add;
 
-pub type Index = u16;
+pub type Index = u32;
 
 /// A virtual vertex offset in a geometry.
 ///
@@ -233,10 +233,10 @@ pub type Index = u16;
 /// `GeometryBuilder::end_geometry`. `GeometryBuilder` implementations typically be translate
 /// the ids internally so that first `VertexId` after `begin_geometry` is zero.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct VertexId(pub u16);
+pub struct VertexId(pub Index);
 
 impl VertexId {
-    pub fn offset(&self) -> u16 { self.0 }
+    pub fn offset(&self) -> Index { self.0 }
 }
 
 /// An interface separating tessellators and other geometry generation algorithms from the

@@ -284,7 +284,7 @@ impl<T> ops::IndexMut<BufferId<T>> for GpuBufferStore<T> {
     }
 }
 
-pub fn create_index_buffer(factory: &mut GlFactory, data: &[u16]) -> Ibo {
+pub fn create_index_buffer(factory: &mut GlFactory, data: &[u32]) -> Ibo {
     use gfx::IntoIndexBuffer;
     return data.into_index_buffer(factory);
 }

@@ -256,11 +256,11 @@ impl VertexBuilder<FillPrimitiveId, GpuFillVertex> for FillVertexBuilder {
         return FillGeometryRanges {
             vertices: FillVertexBufferRange {
                 buffer: BufferId::new(0),
-                range: IdRange::from_start_count(vtx_offset as u16, count.vertices as u16),
+                range: IdRange::from_start_count(vtx_offset as u32, count.vertices as u32),
             },
             indices: IndexBufferRange {
                 buffer: BufferId::new(0),
-                range: IdRange::from_start_count(idx_offset as u16, count.indices as u16),
+                range: IdRange::from_start_count(idx_offset as u32, count.indices as u32),
             },
         };
     }
@@ -284,11 +284,11 @@ impl VertexBuilder<FillPrimitiveId, GpuFillVertex> for FillVertexBuilder {
         return FillGeometryRanges {
             vertices: FillVertexBufferRange {
                 buffer: BufferId::new(0),
-                range: IdRange::from_start_count(vtx_offset as u16, count.vertices as u16),
+                range: IdRange::from_start_count(vtx_offset as u32, count.vertices as u32),
             },
             indices: IndexBufferRange {
                 buffer: BufferId::new(0),
-                range: IdRange::from_start_count(idx_offset as u16, count.indices as u16),
+                range: IdRange::from_start_count(idx_offset as u32, count.indices as u32),
             },
         };
     }

@@ -110,9 +110,9 @@ fn main() {
     let mut cpu = Cpu {
         fills: VertexBuffers::new(),
         strokes: VertexBuffers::new(),
-        transforms: BufferStore::new(1, PRIM_BUFFER_LEN as u16),
-        fill_primitives: BufferStore::new(1, PRIM_BUFFER_LEN as u16),
-        stroke_primitives: BufferStore::new(1, PRIM_BUFFER_LEN as u16),
+        transforms: BufferStore::new(1, PRIM_BUFFER_LEN as u32),
+        fill_primitives: BufferStore::new(1, PRIM_BUFFER_LEN as u32),
+        stroke_primitives: BufferStore::new(1, PRIM_BUFFER_LEN as u32),
     };
 
     let default_transform = cpu.transforms.push(GpuTransform::default());

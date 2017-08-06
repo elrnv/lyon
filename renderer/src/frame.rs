@@ -2,7 +2,7 @@ use renderer::{ GpuFillVertex, GpuStrokeVertex, GpuStrokePrimitive, GpuFillPrimi
 use api::Color;
 use buffer::*;
 
-pub type Index = u16;
+pub type Index = u32;
 pub type IndexBufferId = BufferId<Index>;
 pub type IndexBufferRange = BufferRange<Index>;
 pub type TransformBufferId = BufferId<GpuTransform>;

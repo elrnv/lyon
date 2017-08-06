@@ -6,15 +6,15 @@ use std::marker::PhantomData;
 use std::ops;
 
 pub struct Id<T> {
-    handle: u16,
+    handle: u32,
     _marker: PhantomData<T>,
 }
 
 impl<T> Id<T> {
-    pub fn new(handle: u16) -> Self { Id { handle: handle, _marker: PhantomData  } }
+    pub fn new(handle: u32) -> Self { Id { handle: handle, _marker: PhantomData  } }
     pub fn index(&self) -> usize { self.handle as usize }
     pub fn to_i32(&self) -> i32 { self.handle as i32 }
-    pub fn to_u16(&self) -> u16 { self.handle }
+    pub fn to_u16(&self) -> u16 { self.handle as u16}
     pub fn as_range(&self) -> IdRange<T> { IdRange::new(self.handle..self.handle+1) }
 }
 
@@ -37,14 +37,14 @@ impl<T> hash::Hash for Id<T> {
 }
 
 pub struct IdRange<T> {
-    start: u16,
-    end: u16,
+    start: u32,
+    end: u32,
     _marker: PhantomData<T>,
 }
 
 impl<T> IdRange<T> {
     #[inline]
-    pub fn new(range: ops::Range<u16>) -> Self {
+    pub fn new(range: ops::Range<u32>) -> Self {
         IdRange {
             start: range.start,
             end: range.end,
@@ -68,19 +68,19 @@ impl<T> IdRange<T> {
     pub fn usize_range(&self) -> ops::Range<usize> { self.start_index()..self.end_index() }
 
     #[inline]
-    pub fn u16_range(&self) -> ops::Range<u16> { self.start..self.end }
+    pub fn u16_range(&self) -> ops::Range<u16> { self.start as u16..self.end as u16 }
 
     #[inline]
-    pub fn from_indices(indices: ops::Range<usize>) -> Self { IdRange::new(indices.start as u16..indices.end as u16) }
+    pub fn from_indices(indices: ops::Range<usize>) -> Self { IdRange::new(indices.start as u32..indices.end as u32) }
 
     #[inline]
-    pub fn from_start_count(start: u16, count: u16) -> Self { IdRange::new(start..(start + count)) }
+    pub fn from_start_count(start: u32, count: u32) -> Self { IdRange::new(start..(start + count)) }
 
     #[inline]
-    pub fn count(&self) -> u16 { self.end - self.start }
+    pub fn count(&self) -> u32 { self.end - self.start }
 
     #[inline]
-    pub fn get(&self, n: u16) -> Id<T> {
+    pub fn get(&self, n: u32) -> Id<T> {
         assert!(n < (self.end - self.start), "Shape id out of range.");
         Id::new(self.start + n)
     }
@@ -169,7 +169,7 @@ pub struct BufferRange<T> {
 }
 
 impl<T> BufferRange<T> {
-    pub fn get(&self, nth: u16) -> BufferElement<T> {
+    pub fn get(&self, nth: u32) -> BufferElement<T> {
         BufferElement {
             buffer: self.buffer,
             element: self.range.get(nth),
@@ -192,7 +192,7 @@ pub struct CpuBuffer<T> {
 }
 
 impl<T: Default+Copy> CpuBuffer<T> {
-    pub fn new(size: u16) -> Self {
+    pub fn new(size: u32) -> Self {
         CpuBuffer {
             data: vec![Default::default(); size as usize],
             allocator: SimpleBufferAllocator::new(size),
@@ -214,11 +214,11 @@ impl<T: Default+Copy> CpuBuffer<T> {
         return id;
     }
 
-    pub fn try_alloc_range(&mut self, count: u16) -> Option<IdRange<T>> {
+    pub fn try_alloc_range(&mut self, count: u32) -> Option<IdRange<T>> {
         self.allocator.alloc_range(count).map(|range|{ IdRange::new(range.0..range.0+range.1) })
     }
 
-    pub fn alloc_range(&mut self, count: u16) -> IdRange<T> {
+    pub fn alloc_range(&mut self, count: u32) -> IdRange<T> {
         self.try_alloc_range(count).unwrap()
     }
 
@@ -226,11 +226,11 @@ impl<T: Default+Copy> CpuBuffer<T> {
         self.allocator.alloc_back().map(|idx|{ Id::new(idx) })
     }
 
-    pub fn try_alloc_range_back(&mut self, count: u16) -> Option<IdRange<T>> {
+    pub fn try_alloc_range_back(&mut self, count: u32) -> Option<IdRange<T>> {
         self.allocator.alloc_range_back(count).map(|range|{ IdRange::new(range.0..range.0+range.1) })
     }
 
-    pub fn alloc_range_back(&mut self, count: u16) -> IdRange<T> {
+    pub fn alloc_range_back(&mut self, count: u32) -> IdRange<T> {
         self.try_alloc_range_back(count).unwrap()
     }
 
@@ -246,7 +246,7 @@ impl<T: Default+Copy> CpuBuffer<T> {
 
     pub fn len(&self) -> usize { self.data.len() }
 
-    pub fn range(&self) -> IdRange<T> { IdRange::new(0..self.len() as u16) }
+    pub fn range(&self) -> IdRange<T> { IdRange::new(0..self.len() as u32) }
 
     pub fn sub_slice(&self, range: IdRange<T>) -> &[T] {
         let range = self.range().intersection(range);
@@ -289,13 +289,13 @@ impl<T: Copy+Default> std::ops::IndexMut<IdRange<T>> for CpuBuffer<T> {
 }
 
 pub struct SimpleBufferAllocator {
-    back_index: u16,
-    front_index: u16,
-    len: u16,
+    back_index: u32,
+    front_index: u32,
+    len: u32,
 }
 
 impl SimpleBufferAllocator {
-    pub fn new(len: u16) -> Self {
+    pub fn new(len: u32) -> Self {
         SimpleBufferAllocator {
             back_index: len,
             front_index: 0,
@@ -303,11 +303,11 @@ impl SimpleBufferAllocator {
         }
     }
 
-    pub fn len(&self) -> u16 { self.len }
+    pub fn len(&self) -> u32 { self.len }
 
-    pub fn available_size(&self) -> u16 { self.back_index - self.front_index }
+    pub fn available_size(&self) -> u32 { self.back_index - self.front_index }
 
-    pub fn alloc_range_back(&mut self, len: u16) -> Option<(u16, u16)> {
+    pub fn alloc_range_back(&mut self, len: u32) -> Option<(u32, u32)> {
         if self.available_size() < len {
             return None;
         }
@@ -317,11 +317,11 @@ impl SimpleBufferAllocator {
         return Some((self.back_index, len));
     }
 
-    pub fn alloc_back(&mut self) -> Option<u16> {
+    pub fn alloc_back(&mut self) -> Option<u32> {
         self.alloc_range_back(1).map(|range|{ range.0 })
     }
 
-    pub fn alloc_range(&mut self, len: u16) -> Option<(u16, u16)> {
+    pub fn alloc_range(&mut self, len: u32) -> Option<(u32, u32)> {
         if self.available_size() < len {
             return None;
         }
@@ -332,7 +332,7 @@ impl SimpleBufferAllocator {
         return Some((id, len));
     }
 
-    pub fn alloc(&mut self) -> Option<u16> {
+    pub fn alloc(&mut self) -> Option<u32> {
         self.alloc_range(1).map(|range|{ range.0 })
     }
 }
@@ -343,14 +343,14 @@ pub struct TypedSimpleBufferAllocator<T> {
 }
 
 impl<T> TypedSimpleBufferAllocator<T> {
-    pub fn new(len: u16) -> Self {
+    pub fn new(len: u32) -> Self {
         TypedSimpleBufferAllocator {
             alloc: SimpleBufferAllocator::new(len),
             _marker: PhantomData,
         }
     }
 
-    pub fn len(&self) -> u16 { self.alloc.len() }
+    pub fn len(&self) -> u32 { self.alloc.len() }
 
     pub fn alloc(&mut self) -> Option<Id<T>> {
         self.alloc.alloc().map(|id|{ Id::new(id) })
@@ -360,13 +360,13 @@ impl<T> TypedSimpleBufferAllocator<T> {
         self.alloc.alloc_back().map(|id|{ Id::new(id) })
     }
 
-    pub fn alloc_range(&mut self, len: u16) -> Option<IdRange<T>> {
+    pub fn alloc_range(&mut self, len: u32) -> Option<IdRange<T>> {
         self.alloc.alloc_range(len).map(|(first, count)|{
             IdRange::new(first..(first + count))
         })
     }
 
-    pub fn alloc_range_back(&mut self, len: u16) -> Option<IdRange<T>> {
+    pub fn alloc_range_back(&mut self, len: u32) -> Option<IdRange<T>> {
         self.alloc.alloc_range_back(len).map(|(first, count)|{
             IdRange::new(first..(first+count))
         })
@@ -377,11 +377,11 @@ impl<T> TypedSimpleBufferAllocator<T> {
 pub struct BufferStore<Primitive> {
     pub buffers: Vec<CpuBuffer<Primitive>>,
     current: BufferId<Primitive>,
-    buffer_len: u16,
+    buffer_len: u32,
 }
 
 impl<Primitive: Copy+Default> BufferStore<Primitive> {
-    pub fn new(count: u16, size: u16) -> Self {
+    pub fn new(count: u32, size: u32) -> Self {
         let mut store = BufferStore {
             buffers: Vec::new(),
             current: BufferId::new(0),
@@ -416,7 +416,7 @@ impl<Primitive: Copy+Default> BufferStore<Primitive> {
         self.buffers.push(CpuBuffer::new(len));
     }
 
-    pub fn alloc_range(&mut self, count: u16) -> BufferRange<Primitive> {
+    pub fn alloc_range(&mut self, count: u32) -> BufferRange<Primitive> {
         assert!(count <= self.buffer_len);
         loop {
             if let Some(range) = self.mut_current_buffer().try_alloc_range(count) {
@@ -447,7 +447,7 @@ impl<Primitive: Copy+Default> BufferStore<Primitive> {
         return id;
     }
 
-    pub fn alloc_range_back(&mut self, count: u16) -> BufferRange<Primitive> {
+    pub fn alloc_range_back(&mut self, count: u32) -> BufferRange<Primitive> {
         assert!(count <= self.buffer_len);
         loop {
             if let Some(range) = self.mut_current_buffer().try_alloc_range(count) {
